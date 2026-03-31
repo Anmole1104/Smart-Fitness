@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Fitness Route Advisor</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      height: 70vh;
+      width: 100%;
+    }
+    #stats {
+      display: flex;
+      gap: 15px;
+      margin: 15px;
+      justify-content: center;
+    }
+    .card {
+      flex: 1;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    .calories { background:#ffe5e5; }
+    .weather { background:#e5f0ff; }
+    .stopwatch { background:#e5ffe5; }
+    button {
+      margin: 3px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 8px;
+      background: #333;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover { background: #555; }
+
+    /* -------- Login Page Styling -------- */
+    #loginPage {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      text-align: center;
+      width: 320px;
+    }
+    .login-box h2 {
+      margin-bottom: 20px;
+    }
+    .login-box input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .login-box button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      background: #2575fc;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .login-box button:hover {
+      background: #1a5edb;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login Page -->
+<div id="loginPage">
+  <div class="login-box">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Enter Email">
+    <input type="password" id="password" placeholder="Enter Password">
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<h2 style="text-align:center; margin-top:10px;">Smart Fitness Route Advisor</h2>
+
+<div id="map"></div>
+
+<div id="stats">
+  <!-- Calories -->
+  <div class="card calories">
+    <h3>🔥 Calories Burned</h3>
+    <p id="calories">0 kcal</p>
+    <h3>🚶 Walking Time</h3>
+    <p id="walkTime">0 min</p>
+  </div>
+
+  <!-- Weather -->
+  <div class="card weather">
+    <h3>☀️ Weather</h3>
+    <p id="weather">Sunny, 32°C</p>
+  </div>
+
+  <!-- Stopwatch -->
+  <div class="card stopwatch">
+    <h3>⏱ Stopwatch</h3>
+    <p id="stopwatch">00:00:00</p>
+    <button onclick="startTimer()">Start</button>
+    <button onclick="pauseTimer()">Pause</button>
+    <button onclick="resetTimer()">Reset</button>
+  </div>
+</div>
+
+<script>
+  // -------- Login Logic --------
+  function login() {
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
+
+    if (email && password) {
+      document.getElementById("loginPage").style.display = "none";
+    } else {
+      alert("Please enter Email & Password");
+    }
+  }
+
+  // -------- Map --------
+  let map = L.map('map').setView([28.6139, 77.2090], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+  let startMarker, endMarker, routingControl;
+  let clickCount = 0;
+
+  // Click to set start/end points
+  map.on('click', function(e) {
+      if (clickCount === 0) {
+          if (startMarker) map.removeLayer(startMarker);
+          startMarker = L.marker(e.latlng).addTo(map).bindPopup("Start Point").openPopup();
+          clickCount++;
+      } else if (clickCount === 1) {
+          if (endMarker) map.removeLayer(endMarker);
+          endMarker = L.marker(e.latlng).addTo(map).bindPopup("End Point").openPopup();
+
+          if (routingControl) map.removeControl(routingControl);
+
+          routingControl = L.Routing.control({
+              waypoints: [
+                  startMarker.getLatLng(),
+                  endMarker.getLatLng()
+              ],
+              routeWhileDragging: true
+          }).on('routesfound', function(e) {
+              let distance = e.routes[0].summary.totalDistance; // in meters
+              let km = distance / 1000;
+
+              // Calories (50 kcal per km for average walking)
+              let calories = Math.round(km * 50);
+              document.getElementById("calories").innerText = calories + " kcal";
+
+              // Walking time (5 km/h = 12 min per km)
+              let minutes = Math.round(km * 12);
+              document.getElementById("walkTime").innerText = minutes + " min";
+
+              // Drink break every 50 kcal
+              if (calories % 50 === 0 && calories !== 0) {
+                  alert("💧 Drink water break! You've burned " + calories + " kcal");
+              }
+          }).addTo(map);
+
+          clickCount = 0;
+      }
+  });
+
+  // -------- Stopwatch --------
+  let timerInterval;
+  let seconds = 0;
+
+  function updateStopwatch() {
+      let hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+      let mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+      let secs = String(seconds % 60).padStart(2, '0');
+      document.getElementById("stopwatch").innerText = `${hrs}:${mins}:${secs}`;
+  }
+
+  function startTimer() {
+      if (!timerInterval) {
+          timerInterval = setInterval(() => {
+              seconds++;
+              updateStopwatch();
+          }, 1000);
+      }
+  }
+
+  function pauseTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+  }
+
+  function resetTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      seconds = 0;
+      updateStopwatch();
+  }
+
+  // Example weather (static)
+  document.getElementById("weather").innerText = "☀️ Sunny, 32°C";
+</script>
+
+</body>
+</html>

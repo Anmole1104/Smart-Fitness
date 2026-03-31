@@ -1,0 +1,118 @@
+/* General */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6fa;
+}
+
+header {
+  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  color: white;
+  text-align: center;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Login */
+.login-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(120deg, #89f7fe, #66a6ff);
+}
+
+.login-container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-align: center;
+  width: 300px;
+}
+
+.login-container input, .login-container button {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.login-container button {
+  background: #2575fc;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* Dashboard */
+.controls {
+  text-align: center;
+  margin: 10px;
+}
+
+#map {
+  height: 400px;
+  margin: 10px;
+  border-radius: 10px;
+}
+
+.stats {
+  margin: 15px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Chatbot */
+#chatbot {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 280px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#chatHeader {
+  background: #2575fc;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+}
+
+#chatBody {
+  height: 200px;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+#chatInputBox {
+  display: flex;
+  border-top: 1px solid #ddd;
+}
+
+#chatInput {
+  flex: 1;
+  border: none;
+  padding: 8px;
+}
+
+#chatInput:focus {
+  outline: none;
+}
+
+#chatInputBox button {
+  background: #2575fc;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}

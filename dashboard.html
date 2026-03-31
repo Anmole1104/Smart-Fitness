@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Smart Fitness Route Advisor</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body>
+  <header>
+    <h2>🏃 Smart Fitness Route Advisor</h2>
+    <p id="welcomeUser"></p>
+  </header>
+
+  <div class="controls">
+    <select id="mode">
+      <option value="walking">🚶 Walking</option>
+      <option value="cycling">🚴 Cycling</option>
+    </select>
+    <button onclick="resetMap()">Reset</button>
+  </div>
+
+  <div id="map"></div>
+
+  <div class="stats">
+    <p><b>Calories Burned:</b> <span id="calories">0</span> kcal</p>
+    <p><b>Weather:</b> <span id="weather">Sunny, 32°C</span></p>
+    <p><b>Stopwatch:</b> <span id="stopwatch">00:00:00</span></p>
+    <button onclick="startStopwatch()">Start</button>
+    <button onclick="pauseStopwatch()">Pause</button>
+    <button onclick="resetStopwatch()">Reset</button>
+  </div>
+
+  <!-- Chatbot -->
+  <div id="chatbot">
+    <div id="chatHeader">🤖 Fitness Assistant</div>
+    <div id="chatBody"></div>
+    <div id="chatInputBox">
+      <input type="text" id="chatInput" placeholder="Ask me anything...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
